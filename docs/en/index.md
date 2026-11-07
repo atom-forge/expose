@@ -261,4 +261,4 @@ The allow-list holds only as far as the views name their fields. These are the t
 
 ## Upgrading
 
-No version has been published yet.
+0.1.0 is the first published version, so there is nothing to upgrade from yet.

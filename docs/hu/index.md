@@ -261,4 +261,4 @@ Az engedélylista csak addig véd, amíg a nézetek megnevezik a mezőiket. Ezek
 
 ## Frissítés
 
-Még nem jelent meg kiadott verzió.
+A 0.1.0 az első kiadott verzió, így még nincs miről frissíteni.

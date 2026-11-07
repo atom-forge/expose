@@ -42,6 +42,9 @@
 		"pub-check": "ship-it check",
 		"pub": "ship-it"
 	},
+	"publishConfig": {
+		"access": "public"
+	},
 	"ship": {
 		"verify": [
 			"bun run typecheck",
