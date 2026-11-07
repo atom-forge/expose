@@ -1,0 +1,60 @@
+{
+	"name": "@atom-forge/expose",
+	"version": "0.1.0",
+	"description": "Typed allow-list layer between server data and the client: nothing goes out unless a view names it",
+	"keywords": [
+		"allow-list",
+		"expose",
+		"serialization",
+		"security",
+		"typescript"
+	],
+	"author": {
+		"name": "Gergely Laborci",
+		"url": "https://github.com/laborci"
+	},
+	"license": "MIT",
+	"type": "module",
+	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"import": "./dist/index.js",
+			"default": "./dist/index.js"
+		}
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/atom-forge/expose.git"
+	},
+	"files": [
+		"dist",
+		"docs",
+		"README-AI.md",
+		"CHANGELOG.md"
+	],
+	"scripts": {
+		"build": "tsup",
+		"test": "bun test",
+		"typecheck": "tsc --noEmit",
+		"prepublishOnly": "bun run typecheck && bun test && bun run build",
+		"pub-check": "ship-it check",
+		"pub": "ship-it"
+	},
+	"ship": {
+		"verify": [
+			"bun run typecheck",
+			"bun test",
+			"bun run build",
+			"npm pack --dry-run --ignore-scripts"
+		]
+	},
+	"devDependencies": {
+		"@atom-forge/ship": "file:../ship",
+		"@types/bun": "^1.4.4",
+		"@types/node": "^25.3.1",
+		"tsup": "^8.5.1",
+		"typescript": "^5.0.0"
+	}
+}

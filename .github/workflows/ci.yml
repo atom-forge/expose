@@ -1,0 +1,30 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: expose
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: expose
+      # @atom-forge/ship is a file:../ship dev dependency.
+      - uses: actions/checkout@v4
+        with:
+          repository: atom-forge/ship
+          path: ship
+          persist-credentials: false
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.4.0'
+      - run: bun install --frozen-lockfile
+      - run: bun run typecheck
+      - run: bun test
+      - run: bun run build
