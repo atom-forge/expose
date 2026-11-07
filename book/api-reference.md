@@ -32,10 +32,14 @@ Returns a factory that takes field names of `S` and returns a view copying those
 ## `View<S, O, R>`
 
 ```ts
-type View<S, O, R> = (source: S, output: Readonly<O>) => R;
+type View<S, O, R extends Part> = (source: S, output: Readonly<O>) => R;
 ```
 
-`S` is the source the view reads, `O` is the output built before it, and `R` is the part it returns. `R` must be a plain object, returned synchronously.
+`S` is the source the view reads, `O` is the output built before it, and `R` is the part it returns. `R` must be a plain object: a promise, an array, a string, a date, a map, a function or a possibly `null` value is a compile error, because it could not be merged.
+
+## `Part`
+
+What a view may return: a plain object. Only symbol keys are excluded, so a field named `then` or `length` is fine.
 
 ## `Stacked<T>`
 

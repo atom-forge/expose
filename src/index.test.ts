@@ -131,6 +131,10 @@ describe('fieldsOf', () => {
 	});
 });
 
+interface Declared {
+	id: string;
+}
+
 // Compile-time checks: `bun run typecheck` fails if one of these stops being an error.
 export function typeChecks() {
 	const out = expose(user, card);
@@ -167,9 +171,36 @@ export function typeChecks() {
 	expose({ id: 'x' }, fields('name'));
 	// @ts-expect-error The type of the column does not fit.
 	expose({ name: 1 }, fields('name'));
+	// @ts-expect-error A promise would lose its data.
+	expose(user, async () => ({ a: 1 }));
+	// @ts-expect-error An array would become numbered keys.
+	expose(user, () => ['a']);
+	// @ts-expect-error A string would become numbered keys.
+	expose(user, () => 'a');
+	// @ts-expect-error A number has nothing to merge.
+	expose(user, () => 1);
+	// @ts-expect-error A date has nothing to merge.
+	expose(user, () => new Date());
+	// @ts-expect-error A map has nothing to merge.
+	expose(user, () => new Map<string, string>());
+	// @ts-expect-error A function has nothing to merge.
+	expose(user, () => () => 1);
+	// @ts-expect-error Nothing returned.
+	expose(user, () => {});
+	// @ts-expect-error null has nothing to merge.
+	expose(user, () => (user.id ? { a: 1 } : null));
+	// @ts-expect-error It is checked in every position.
+	expose(user, identity, async () => ({ a: 1 }));
+	// @ts-expect-error It is checked in compose too.
+	compose(identity, async () => ({ a: 1 }));
+	const collidingNames = expose(user, () => ({ then: 'x', call: 'y', length: 1, iterator: 'z' }));
+	const thenField: string = collidingNames.then;
+	const either = expose(user, () => (user.id ? { a: 1 } : {}));
+	const empty = expose(user, () => ({}));
+	const declared = expose(user, (source): Declared => ({ id: source.id }));
 	const label = (_source: unknown, output: Readonly<{ name: string }>) => ({ label: output.name });
 	const labelled: string = expose({ name: 'y' }, fields('name'), label).label;
 	// @ts-expect-error `name` is not built yet when `label` runs.
 	expose({ name: 'y' }, label, fields('name'));
-	return { name, home, work, stillHome, count, id, phone, labelled };
+	return { name, home, work, stillHome, count, id, phone, labelled, thenField, either, empty, declared };
 }

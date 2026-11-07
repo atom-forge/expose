@@ -232,10 +232,14 @@ Returns a factory that takes field names of `S` and returns a view copying those
 ### `View<S, O, R>`
 
 ```ts
-type View<S, O, R> = (source: S, output: Readonly<O>) => R;
+type View<S, O, R extends Part> = (source: S, output: Readonly<O>) => R;
 ```
 
-`S` is the source the view reads, `O` is the output built before it, and `R` is the part it returns. `R` must be a plain object, returned synchronously.
+`S` is the source the view reads, `O` is the output built before it, and `R` is the part it returns. `R` must be a plain object: a promise, an array, a string, a date, a map, a function or a possibly `null` value is a compile error, because it could not be merged.
+
+### `Part`
+
+What a view may return: a plain object. Only symbol keys are excluded, so a field named `then` or `length` is fine.
 
 ### `Stacked<T>`
 
@@ -256,8 +260,6 @@ The allow-list holds only as far as the views name their fields. These are the t
 - **Treating a view as a permission check.** A view says what goes out, not who may get it. Do the permission check before the call.
 - **Changing a nested value of `output`.** `output` is frozen only at the top level. A view that writes into `output.links` changes an earlier view's value. Build a new object instead, as in the stacking example.
 - **Forgetting the `Stacked` mark.** Without it, the types say the key was replaced even though your view added to it, so the earlier names are missing from the output type.
-- **An `async` view.** Views run synchronously. The properties of a returned promise are not merged, so its data never reaches the output, while the types still describe a promise. Load the data first and pass it in on the row.
-- **Returning something other than a plain object.** The part is merged with an object spread: an array or a string would come out as numbered keys.
 
 ## Upgrading
 

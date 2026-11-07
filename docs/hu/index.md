@@ -232,10 +232,14 @@ Olyan gyárat ad vissza, amely az `S` mezőneveit kapja meg, és egy ezeket a me
 ### `View<S, O, R>`
 
 ```ts
-type View<S, O, R> = (source: S, output: Readonly<O>) => R;
+type View<S, O, R extends Part> = (source: S, output: Readonly<O>) => R;
 ```
 
-Az `S` a nézet által olvasott forrás, az `O` az előtte felépített kimenet, az `R` pedig a visszaadott rész. Az `R` egyszerű objektum legyen, szinkron módon visszaadva.
+Az `S` a nézet által olvasott forrás, az `O` az előtte felépített kimenet, az `R` pedig a visszaadott rész. Az `R` egyszerű objektum legyen: a promise, a tömb, a szöveg, a dátum, a map, a függvény és az esetleg `null` érték fordítási hiba, mert nem fésülhető össze.
+
+### `Part`
+
+Amit egy nézet visszaadhat: egyszerű objektum. Csak szimbólumkulcsok alapján szűr, így egy `then` vagy `length` nevű mező használható.
 
 ### `Stacked<T>`
 
@@ -256,8 +260,6 @@ Az engedélylista csak addig véd, amíg a nézetek megnevezik a mezőiket. Ezek
 - **A nézet jogosultság-ellenőrzésként kezelése.** A nézet azt mondja meg, mi megy ki, azt nem, hogy ki kaphatja meg. A jogosultságot a hívás előtt ellenőrizd.
 - **Az `output` beágyazott értékének módosítása.** Az `output` csak a legfelső szinten fagyasztott. Ha egy nézet az `output.links` értékébe ír, egy korábbi nézet értékét változtatja meg. Inkább új objektumot építs, ahogy a `Stacked` példában.
 - **A `Stacked` jelölés elhagyása.** Nélküle a típusok szerint a kulcs lecserélődött, pedig a nézet hozzáadott, így a korábbi nevek hiányoznak a kimenet típusából.
-- **`async` nézet.** A nézetek szinkron futnak. A visszaadott promise tulajdonságai nem fésülődnek össze, így az adata nem jut el a kimenetre, miközben a típusok promise-t írnak le. Előbb töltsd be az adatot, és a soron add át.
-- **Nem egyszerű objektum visszaadása.** A rész objektum-szétterítéssel fésülődik össze: egy tömb vagy szöveg számozott kulcsokként jelenne meg.
 
 ## Frissítés
 

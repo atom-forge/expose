@@ -9,7 +9,7 @@ The [documentation](./docs/en/index.md) is authoritative where the two disagree;
 - Copy plain fields with `fieldsOf`; write a view by hand for computed fields and nested data.
 - A view names every field it returns. Never spread `source`, and never return a nested row as it is: run it through its own view.
 - A view says *what* goes out, not *who* may get it. Do the permission check before the call.
-- A view is synchronous and returns a plain object.
+- A view is synchronous and returns a plain object; anything else is a compile error.
 - A later view overwrites earlier keys. To add to a key instead, read it from `output`, build a new value, and mark it `Stacked`.
 - `output` is frozen only at the top level: do not write into its nested values.
 - The allowed list of `fieldsOf<S>()` exists only in the types: never pass it names from a request, and leave objects off `S`.
@@ -17,7 +17,8 @@ The [documentation](./docs/en/index.md) is authoritative where the two disagree;
 ## API
 
 ```ts
-type View<S, O, R> = (source: S, output: Readonly<O>) => R;
+type View<S, O, R extends Part> = (source: S, output: Readonly<O>) => R;
+type Part;          // a plain object: promises, arrays, strings, dates, maps and functions are compile errors
 type Stacked<T>;    // marks a key that adds up; types only, the view does the adding
 type Merge<A, B>;   // keys of B overwrite keys of A; Stacked keys become A[K] & B[K]
 
@@ -78,8 +79,6 @@ Type its `output` as `Readonly<Record<string, any>>`, so it fits after any earli
 
 - The library cannot stop code from returning a row without calling it; a project that needs this adds its own guard test.
 - Without the `Stacked` mark, the types say the key was replaced, even though the view added to it.
-- An `async` view loses its data: the properties of a promise are not merged, while the types still describe a promise.
-- An array or string returned by a view comes out as numbered keys.
 
 ## Documentation map
 

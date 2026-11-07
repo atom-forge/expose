@@ -5,7 +5,18 @@
  * overwrite earlier keys; a view that wants to add to a key reads it from `output` and marks it `Stacked`.
  * Never spread `source` in a view: that would let every column out.
  */
-export type View<S, O, R> = (source: S, output: Readonly<O>) => R;
+export type View<S, O, R extends Part> = (source: S, output: Readonly<O>) => R;
+
+/**
+ * What a view may return: a plain object. The run-time merge is an object spread, so a promise would lose its data and
+ * an array or a string would become numbered keys. Only symbol keys are excluded, so no field name can collide.
+ */
+export type Part = object & {
+	readonly [Symbol.iterator]?: never; // arrays, maps, sets
+	readonly [Symbol.toStringTag]?: never; // promises
+	readonly [Symbol.hasInstance]?: never; // functions
+	readonly [Symbol.toPrimitive]?: never; // dates
+};
 
 declare const stacked: unique symbol;
 /** Marks a key that adds to the earlier value instead of replacing it; the view does the adding with `output`. */
@@ -27,17 +38,17 @@ function run(source: any, views: View<any, any, any>[], start: any) {
 }
 
 /** Builds the output of a row (null and undefined become null, so an optional relation needs no check at the call). */
-export function expose<S, A>(source: S, a: View<NonNullable<S>, {}, A>): A | Nullish<S>;
-export function expose<S, A, B>(source: S, a: View<NonNullable<S>, {}, A>, b: View<NonNullable<S>, A, B>): Merge<A, B> | Nullish<S>;
-export function expose<S, A, B, C>(source: S, a: View<NonNullable<S>, {}, A>, b: View<NonNullable<S>, A, B>, c: View<NonNullable<S>, Merge<A, B>, C>): Merge<Merge<A, B>, C> | Nullish<S>;
-export function expose<S, A, B, C, D>(source: S, a: View<NonNullable<S>, {}, A>, b: View<NonNullable<S>, A, B>, c: View<NonNullable<S>, Merge<A, B>, C>, d: View<NonNullable<S>, Merge<Merge<A, B>, C>, D>): Merge<Merge<Merge<A, B>, C>, D> | Nullish<S>;
+export function expose<S, A extends Part>(source: S, a: View<NonNullable<S>, {}, A>): A | Nullish<S>;
+export function expose<S, A extends Part, B extends Part>(source: S, a: View<NonNullable<S>, {}, A>, b: View<NonNullable<S>, A, B>): Merge<A, B> | Nullish<S>;
+export function expose<S, A extends Part, B extends Part, C extends Part>(source: S, a: View<NonNullable<S>, {}, A>, b: View<NonNullable<S>, A, B>, c: View<NonNullable<S>, Merge<A, B>, C>): Merge<Merge<A, B>, C> | Nullish<S>;
+export function expose<S, A extends Part, B extends Part, C extends Part, D extends Part>(source: S, a: View<NonNullable<S>, {}, A>, b: View<NonNullable<S>, A, B>, c: View<NonNullable<S>, Merge<A, B>, C>, d: View<NonNullable<S>, Merge<Merge<A, B>, C>, D>): Merge<Merge<Merge<A, B>, C>, D> | Nullish<S>;
 export function expose(source: any, ...views: View<any, any, any>[]) {
 	return source === null || source === undefined ? null : run(source, views, {});
 }
 
 /** Names a combination of views; the result is a view itself. */
-export function compose<S1, A, S2, B>(a: View<S1, {}, A>, b: View<S2, A, B>): View<S1 & S2, {}, Merge<A, B>>;
-export function compose<S1, A, S2, B, S3, C>(a: View<S1, {}, A>, b: View<S2, A, B>, c: View<S3, Merge<A, B>, C>): View<S1 & S2 & S3, {}, Merge<Merge<A, B>, C>>;
+export function compose<S1, A extends Part, S2, B extends Part>(a: View<S1, {}, A>, b: View<S2, A, B>): View<S1 & S2, {}, Merge<A, B>>;
+export function compose<S1, A extends Part, S2, B extends Part, S3, C extends Part>(a: View<S1, {}, A>, b: View<S2, A, B>, c: View<S3, Merge<A, B>, C>): View<S1 & S2 & S3, {}, Merge<Merge<A, B>, C>>;
 export function compose(...views: View<any, any, any>[]) {
 	return (source: any, output: any) => run(source, views, output);
 }

@@ -31,9 +31,3 @@ The allow-list holds only as far as the views name their fields. These are the t
 
 > [!bug] Forgetting the `Stacked` mark
 > Without it, the types say the key was replaced even though your view added to it, so the earlier names are missing from the output type.
-
-> [!bug] An `async` view
-> Views run synchronously. The properties of a returned promise are not merged, so its data never reaches the output, while the types still describe a promise. Load the data first and pass it in on the row.
-
-> [!bug] Returning something other than a plain object
-> The part is merged with an object spread: an array or a string would come out as numbered keys.
